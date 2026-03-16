@@ -12,6 +12,9 @@ hero:
     - theme: alt
       text: View on GitHub
       link: https://github.com/Lattice-Node/lattice
+    - theme: alt
+      text: Join Discord
+      link: https://discord.gg/ZmVTRkd7
 
 features:
   - title: Model-agnostic
