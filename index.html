@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lattice – Connect any AI to any AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #020817;
+  --bg2: #0a1628;
+  --blue: #3b82f6;
+  --blue-bright: #60a5fa;
+  --blue-dim: #1d4ed8;
+  --cyan: #06b6d4;
+  --white: #f8fafc;
+  --muted: #94a3b8;
+  --border: rgba(59,130,246,0.15);
+  --glass: rgba(10,22,40,0.7);
+  --font: 'Space Grotesk', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--white);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* STARS BACKGROUND */
+.stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: twinkle var(--d, 3s) ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: var(--min, 0.1); transform: scale(1); }
+  50% { opacity: var(--max, 0.8); transform: scale(1.2); }
+}
+
+/* NEBULA */
+.nebula {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.nebula-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%); top: -100px; left: -100px; }
+.nebula-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%); top: 50%; right: -100px; }
+.nebula-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%); bottom: 0; left: 30%; }
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  background: rgba(2,8,23,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+  text-decoration: none;
+}
+.nav-logo svg { width: 28px; height: 28px; }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.lang-toggle {
+  display: flex;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.lang-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  transition: all 0.2s;
+}
+.lang-btn.active {
+  background: var(--blue);
+  color: white;
+}
+.nav-github {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--white);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.nav-github:hover { background: rgba(255,255,255,0.1); }
+.star-count {
+  background: rgba(59,130,246,0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  color: var(--blue-bright);
+  font-weight: 600;
+}
+
+/* HERO */
+.hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 120px 24px 80px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 100px;
+  font-size: 12px;
+  color: var(--blue-bright);
+  font-weight: 500;
+  margin-bottom: 32px;
+  animation: fadeUp 0.6s ease both;
+}
+.badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+h1 {
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+.gradient-text {
+  background: linear-gradient(135deg, #60a5fa, #06b6d4, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: var(--muted);
+  max-width: 580px;
+  line-height: 1.6;
+  margin-bottom: 48px;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
+.hero-ctas {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 64px;
+  animation: fadeUp 0.6s 0.3s ease both;
+}
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: var(--blue);
+  color: white;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 24px rgba(59,130,246,0.3);
+}
+.btn-primary:hover { background: var(--blue-bright); box-shadow: 0 0 40px rgba(59,130,246,0.5); transform: translateY(-1px); }
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: rgba(255,255,255,0.05);
+  color: var(--white);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: var(--font);
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* LIVE DEMO */
+.demo-container {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  animation: fadeUp 0.6s 0.4s ease both;
+}
+.demo-glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 0 60px rgba(59,130,246,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.demo-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+.demo-title {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+.demo-log {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.8;
+  min-height: 120px;
+}
+.log-line { display: flex; gap: 8px; opacity: 0; animation: logIn 0.3s ease forwards; }
+.log-time { color: #475569; min-width: 60px; }
+.log-agent-a { color: #60a5fa; font-weight: 500; }
+.log-agent-b { color: #34d399; font-weight: 500; }
+.log-server { color: #a78bfa; font-weight: 500; }
+.log-msg { color: #cbd5e1; }
+.log-result { color: #fbbf24; }
+@keyframes logIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.demo-bar {
+  margin-top: 16px;
+  height: 2px;
+  background: rgba(59,130,246,0.1);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.demo-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--cyan));
+  border-radius: 1px;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* INSTALL */
+.install-box {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto 80px;
+  animation: fadeUp 0.6s 0.5s ease both;
+}
+.install-inner {
+  display: flex;
+  align-items: center;
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  gap: 12px;
+}
+.install-prompt { color: var(--cyan); font-family: var(--mono); font-size: 14px; }
+.install-cmd { font-family: var(--mono); font-size: 14px; color: var(--white); flex: 1; }
+.copy-btn {
+  padding: 6px 14px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 6px;
+  color: var(--blue-bright);
+  font-size: 12px;
+  font-family: var(--font);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.copy-btn:hover { background: rgba(59,130,246,0.3); }
+.copy-btn.copied { color: #34d399; border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.1); }
+
+/* SECTIONS */
+section {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--blue-bright);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 560px;
+  margin-bottom: 48px;
+}
+
+/* FEATURES GRID */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.feature-card {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(59,130,246,0.05) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.feature-card:hover { border-color: rgba(59,130,246,0.4); transform: translateY(-3px); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon {
+  width: 40px; height: 40px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: 18px;
+}
+.feature-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.feature-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* CODE BLOCK */
+.code-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.code-block {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(59,130,246,0.05);
+}
+.code-filename {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+.code-body {
+  padding: 20px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+.kw { color: #c084fc; }
+.fn { color: #60a5fa; }
+.str { color: #34d399; }
+.cm { color: #475569; }
+.ty { color: #fbbf24; }
+
+/* HOW IT WORKS */
+.steps { display: flex; flex-direction: column; gap: 0; position: relative; }
+.steps::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: 40px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--blue), transparent);
+}
+.step {
+  display: flex;
+  gap: 20px;
+  padding: 24px 0;
+}
+.step-num {
+  width: 40px; height: 40px;
+  min-width: 40px;
+  background: rgba(59,130,246,0.15);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--blue-bright);
+  position: relative;
+  z-index: 1;
+}
+.step-content { padding-top: 8px; }
+.step-title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* DIVIDER */
+.divider {
+  position: relative;
+  z-index: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* FOOTER */
+footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 48px 24px;
+  border-top: 1px solid var(--border);
+}
+.footer-logo {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.footer-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+.footer-links {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.footer-links a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--blue-bright); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  nav { padding: 12px 20px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .code-section { grid-template-columns: 1fr; }
+  h1 { font-size: 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- STARS -->
+<div class="stars" id="stars"></div>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg viewBox="0 0 28 28" fill="none">
+      <circle cx="14" cy="14" r="4" fill="#3b82f6"/>
+      <circle cx="14" cy="14" r="2" fill="white"/>
+      <circle cx="14" cy="4" r="2.5" fill="#60a5fa"/>
+      <circle cx="24" cy="14" r="2.5" fill="#60a5fa"/>
+      <circle cx="14" cy="24" r="2.5" fill="#60a5fa"/>
+      <circle cx="4" cy="14" r="2.5" fill="#60a5fa"/>
+      <line x1="14" y1="10" x2="14" y2="6.5" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="18" y1="14" x2="21.5" y2="14" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="14" y1="18" x2="14" y2="21.5" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="10" y1="14" x2="6.5" y2="14" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    Lattice
+  </a>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('ja')" id="btn-ja">JP</button>
+      <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+    </div>
+    <a href="https://github.com/Lattice-Node/lattice" target="_blank" class="nav-github">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.72-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 013-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.65 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      <span id="star-label">GitHub</span>
+      <span class="star-count" id="star-count">★ —</span>
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge">
+    <span class="badge-dot"></span>
+    <span id="t-badge">v0.1.0 · オープンソース · MIT License</span>
+  </div>
+
+  <h1>
+    <span id="t-h1a">どんなAIとも</span><br>
+    <span class="gradient-text" id="t-h1b">繋がれる。</span>
+  </h1>
+
+  <p class="hero-sub" id="t-sub">
+    Latticeは、AIエージェント同士をつなぐオープンプロトコルです。GPT-4とClaudeとGeminiが、同じコードで会話できる。
+  </p>
+
+  <div class="hero-ctas">
+    <a href="https://lattice-docs.vercel.app" class="btn-primary" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <span id="t-cta1">ドキュメントを見る</span>
+    </a>
+    <a href="https://github.com/Lattice-Node/lattice" class="btn-secondary" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.58v-2.03c-3.34.72-4.04-1.61-4.04-1.61-.54-1.38-1.33-1.75-1.33-1.75-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 013-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.65 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      <span id="t-cta2">GitHubで見る</span>
+    </a>
+  </div>
+
+  <!-- LIVE DEMO -->
+  <div class="demo-container">
+    <div class="demo-glass">
+      <div class="demo-header">
+        <div class="demo-dot" style="background:#ef4444"></div>
+        <div class="demo-dot" style="background:#f59e0b"></div>
+        <div class="demo-dot" style="background:#10b981"></div>
+        <span class="demo-title" id="t-demo-title">ライブデモ · エージェント通信</span>
+      </div>
+      <div class="demo-log" id="demo-log"></div>
+      <div class="demo-bar"><div class="demo-progress" id="demo-progress"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL -->
+<div style="position:relative;z-index:1;padding:0 24px;">
+  <div class="install-box">
+    <div class="install-inner">
+      <span class="install-prompt">$</span>
+      <span class="install-cmd">npm install @lattice-node/core</span>
+      <button class="copy-btn" onclick="copyInstall(this)" id="t-copy">コピー</button>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section>
+  <div class="section-label" id="t-feat-label">特徴</div>
+  <h2 class="section-title" id="t-feat-title">AIをつなぐ、<br>最もシンプルな方法。</h2>
+  <p class="section-sub" id="t-feat-sub">複雑な設定は不要。どのAIモデルでも、どのフレームワークでも動く。</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-name" id="t-f1-name">モデル非依存</div>
+      <div class="feature-desc" id="t-f1-desc">GPT-4、Claude、Gemini、Llamaなど、どのAIモデルでも接続できます。特定のプロバイダーに縛られません。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-name" id="t-f2-name">WebSocket通信</div>
+      <div class="feature-desc" id="t-f2-desc">リアルタイムの双方向通信。エージェントが別々のサーバーにいても、ミリ秒単位でメッセージを届けます。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-name" id="t-f3-name">型安全</div>
+      <div class="feature-desc" id="t-f3-desc">TypeScriptで書かれた厳密な型定義。LatticeMessageの構造が保証されるので、バグが起きにくい。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-name" id="t-f4-name">5分でセットアップ</div>
+      <div class="feature-desc" id="t-f4-desc">npm installから最初のエージェント通信まで5分。複雑な設定ファイルは一切不要です。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌐</div>
+      <div class="feature-name" id="t-f5-name">オープンソース</div>
+      <div class="feature-desc" id="t-f5-desc">MITライセンス。コードは完全公開。自社のサーバーにセルフホストできます。ベンダーロックインなし。</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📦</div>
+      <div class="feature-name" id="t-f6-name">軽量</div>
+      <div class="feature-desc" id="t-f6-desc">依存ライブラリはwsのみ。バンドルサイズが小さく、どんな環境でも動きます。</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CODE -->
+<section>
+  <div class="section-label" id="t-code-label">クイックスタート</div>
+  <h2 class="section-title" id="t-code-title">10行で始められる。</h2>
+  <p class="section-sub" id="t-code-sub">コードを書くだけ。設定ファイルもDockerも不要。</p>
+  <div class="code-section">
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">server.ts</span>
+        <button class="copy-btn" onclick="copyCode('code1', this)" id="t-copy2">コピー</button>
+      </div>
+      <div class="code-body" id="code1"><span class="kw">import</span> { <span class="ty">LatticeServer</span> } <span class="kw">from</span> <span class="str">'@lattice-node/core'</span>
+
+<span class="cm">// サーバーを起動するだけ</span>
+<span class="kw">new</span> <span class="fn">LatticeServer</span>(<span class="str">8080</span>)
+
+<span class="cm">// Lattice server running on port 8080</span></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">agent.ts</span>
+        <button class="copy-btn" onclick="copyCode('code2', this)" id="t-copy3">コピー</button>
+      </div>
+      <div class="code-body" id="code2"><span class="kw">import</span> { <span class="ty">LatticeClient</span> } <span class="kw">from</span> <span class="str">'@lattice-node/core'</span>
+
+<span class="kw">const</span> agent = <span class="kw">new</span> <span class="fn">LatticeClient</span>(
+  <span class="str">'AgentA'</span>,
+  <span class="str">'ws://localhost:8080'</span>
+)
+<span class="kw">await</span> agent.<span class="fn">waitForOpen</span>()
+
+<span class="cm">// 別のエージェントにタスクを送る</span>
+agent.<span class="fn">send</span>(<span class="str">'AgentB'</span>, <span class="str">'task'</span>, <span class="str">'資料を要約して'</span>)
+
+<span class="cm">// 結果を受け取る</span>
+agent.<span class="fn">onResult</span>(msg => {
+  console.<span class="fn">log</span>(msg.payload)
+})</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-label" id="t-how-label">仕組み</div>
+  <h2 class="section-title" id="t-how-title">どうやって動くの？</h2>
+  <div style="max-width:520px;">
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title" id="t-s1">エージェントがサーバーに接続</div>
+          <div class="step-desc" id="t-s1d">各エージェントはWebSocketでLatticeサーバーに接続します。接続時に名前を登録します。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title" id="t-s2">メッセージを送信</div>
+          <div class="step-desc" id="t-s2d">「誰から」「誰に」「何を」という共通フォーマットでメッセージを送ります。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title" id="t-s3">サーバーがルーティング</div>
+          <div class="step-desc" id="t-s3d">Latticeサーバーが宛先エージェントにメッセージを届けます。別サーバーでも大丈夫。</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title" id="t-s4">結果が返ってくる</div>
+          <div class="step-desc" id="t-s4d">処理したエージェントが結果を返送します。onResult()で受け取るだけ。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Lattice</div>
+  <div class="footer-sub" id="t-footer-sub">Open protocol for AI agent communication</div>
+  <div class="footer-links">
+    <a href="https://lattice-docs.vercel.app" target="_blank" id="t-fl1">ドキュメント</a>
+    <a href="https://github.com/Lattice-Node/lattice" target="_blank">GitHub</a>
+    <a href="https://www.npmjs.com/package/@lattice-node/core" target="_blank">npm</a>
+    <a href="https://discord.gg/ZmVTRkd7" target="_blank">Discord</a>
+    <a href="https://twitter.com/Lattice_Node" target="_blank">X (Twitter)</a>
+  </div>
+</footer>
+
+<script>
+// STARS
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 120; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2 + 0.5;
+  s.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${Math.random()*100}%;
+    top:${Math.random()*100}%;
+    --d:${2+Math.random()*4}s;
+    --min:${0.05+Math.random()*0.1};
+    --max:${0.4+Math.random()*0.6};
+    animation-delay:${Math.random()*4}s;
+  `;
+  starsEl.appendChild(s);
+}
+
+// GITHUB STARS
+fetch('https://api.github.com/repos/Lattice-Node/lattice')
+  .then(r => r.json())
+  .then(d => {
+    const n = d.stargazers_count || 0;
+    document.getElementById('star-count').textContent = '★ ' + n;
+  }).catch(() => {});
+
+// LANG
+const ja = {
+  'badge': 'v0.1.0 · オープンソース · MIT License',
+  'h1a': 'どんなAIとも', 'h1b': '繋がれる。',
+  'sub': 'Latticeは、AIエージェント同士をつなぐオープンプロトコルです。GPT-4とClaudeとGeminiが、同じコードで会話できる。',
+  'cta1': 'ドキュメントを見る', 'cta2': 'GitHubで見る',
+  'demo-title': 'ライブデモ · エージェント通信',
+  'copy': 'コピー', 'copy2': 'コピー', 'copy3': 'コピー',
+  'feat-label': '特徴', 'feat-title': 'AIをつなぐ、\n最もシンプルな方法。', 'feat-sub': '複雑な設定は不要。どのAIモデルでも、どのフレームワークでも動く。',
+  'f1-name': 'モデル非依存', 'f1-desc': 'GPT-4、Claude、Gemini、Llamaなど、どのAIモデルでも接続できます。',
+  'f2-name': 'WebSocket通信', 'f2-desc': 'リアルタイムの双方向通信。別サーバーでもミリ秒単位で届きます。',
+  'f3-name': '型安全', 'f3-desc': 'TypeScriptで書かれた厳密な型定義でバグが起きにくい。',
+  'f4-name': '5分でセットアップ', 'f4-desc': 'npm installから最初の通信まで5分。設定ファイル不要。',
+  'f5-name': 'オープンソース', 'f5-desc': 'MITライセンス。セルフホスト可能。ベンダーロックインなし。',
+  'f6-name': '軽量', 'f6-desc': '依存はwsのみ。どんな環境でも動きます。',
+  'code-label': 'クイックスタート', 'code-title': '10行で始められる。', 'code-sub': 'コードを書くだけ。設定ファイルもDockerも不要。',
+  'how-label': '仕組み', 'how-title': 'どうやって動くの？',
+  's1': 'エージェントがサーバーに接続', 's1d': '各エージェントはWebSocketでLatticeサーバーに接続します。',
+  's2': 'メッセージを送信', 's2d': '共通フォーマットで送ります。',
+  's3': 'サーバーがルーティング', 's3d': 'Latticeが宛先に届けます。別サーバーでも大丈夫。',
+  's4': '結果が返ってくる', 's4d': 'onResult()で受け取るだけ。',
+  'footer-sub': 'AIエージェント通信のオープンプロトコル',
+  'fl1': 'ドキュメント',
+  'demo-lines': [
+    ['AgentA', 'send', '「資料を要約して」→ AgentB'],
+    ['Server', 'route', 'AgentA → AgentB を転送'],
+    ['AgentB', 'recv', 'タスク受信: 資料を要約して'],
+    ['AgentB', 'send', '結果を送信 → AgentA'],
+    ['AgentA', 'result', '✓ 要約が完成しました'],
+  ]
+};
+const en = {
+  'badge': 'v0.1.0 · Open Source · MIT License',
+  'h1a': 'Connect any AI', 'h1b': 'to any AI.',
+  'sub': 'Lattice is an open protocol for AI agent communication. GPT-4, Claude, and Gemini — talking to each other with the same code.',
+  'cta1': 'Read the docs', 'cta2': 'View on GitHub',
+  'demo-title': 'Live demo · Agent communication',
+  'copy': 'Copy', 'copy2': 'Copy', 'copy3': 'Copy',
+  'feat-label': 'Features', 'feat-title': 'The simplest way\nto connect AI agents.', 'feat-sub': 'No complex setup. Works with any AI model and any framework.',
+  'f1-name': 'Model-agnostic', 'f1-desc': 'Connect GPT-4, Claude, Gemini, Llama — any AI to any AI.',
+  'f2-name': 'WebSocket-based', 'f2-desc': 'Real-time bidirectional communication across any servers.',
+  'f3-name': 'Type-safe', 'f3-desc': 'Strict TypeScript types. LatticeMessage structure is always guaranteed.',
+  'f4-name': '5-minute setup', 'f4-desc': 'From npm install to first agent message in 5 minutes.',
+  'f5-name': 'Open source', 'f5-desc': 'MIT license. Self-hostable. No vendor lock-in.',
+  'f6-name': 'Lightweight', 'f6-desc': 'Only one dependency: ws. Runs anywhere.',
+  'code-label': 'Quick Start', 'code-title': 'Start in 10 lines.', 'code-sub': 'Just write code. No config files. No Docker required.',
+  'how-label': 'How it works', 'how-title': 'How does it work?',
+  's1': 'Agent connects to server', 's1d': 'Each agent connects via WebSocket and registers its name.',
+  's2': 'Send a message', 's2d': 'Use the standard LatticeMessage format: from, to, type, payload.',
+  's3': 'Server routes it', 's3d': 'Lattice delivers to the target agent — even on a different server.',
+  's4': 'Result comes back', 's4d': 'The processing agent sends back the result. Just use onResult().',
+  'footer-sub': 'Open protocol for AI agent communication',
+  'fl1': 'Documentation',
+  'demo-lines': [
+    ['AgentA', 'send', '"Summarize the document" → AgentB'],
+    ['Server', 'route', 'Routing AgentA → AgentB'],
+    ['AgentB', 'recv', 'Task received: Summarize the document'],
+    ['AgentB', 'send', 'Sending result → AgentA'],
+    ['AgentA', 'result', '✓ Summary complete'],
+  ]
+};
+
+let currentLang = 'ja';
+function setLang(lang) {
+  currentLang = lang;
+  const t = lang === 'ja' ? ja : en;
+  document.getElementById('btn-ja').classList.toggle('active', lang==='ja');
+  document.getElementById('btn-en').classList.toggle('active', lang==='en');
+  document.documentElement.lang = lang;
+  for (const [k, v] of Object.entries(t)) {
+    if (k === 'demo-lines') continue;
+    const el = document.getElementById('t-' + k);
+    if (el) el.textContent = v;
+  }
+  restartDemo();
+}
+
+// COPY
+function copyInstall(btn) {
+  navigator.clipboard.writeText('npm install @lattice-node/core').catch(()=>{});
+  btn.textContent = '✓ ' + (currentLang==='ja'?'コピー済':'Copied');
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = currentLang==='ja'?'コピー':'Copy'; btn.classList.remove('copied'); }, 2000);
+}
+function copyCode(id, btn) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.innerText).catch(()=>{});
+  btn.textContent = '✓ ' + (currentLang==='ja'?'コピー済':'Copied');
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = currentLang==='ja'?'コピー':'Copy'; btn.classList.remove('copied'); }, 2000);
+}
+
+// LIVE DEMO
+let demoTimer = null;
+function restartDemo() {
+  if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
+  const log = document.getElementById('demo-log');
+  const prog = document.getElementById('demo-progress');
+  log.innerHTML = '';
+  prog.style.width = '0%';
+  const t = currentLang === 'ja' ? ja : en;
+  const lines = t['demo-lines'];
+  const colors = { AgentA: 'log-agent-a', Server: 'log-server', AgentB: 'log-agent-b' };
+  const resultClass = { send: 'log-msg', route: 'log-msg', recv: 'log-msg', result: 'log-result' };
+  let i = 0;
+  function addLine() {
+    if (i >= lines.length) {
+      demoTimer = setTimeout(restartDemo, 2500);
+      return;
+    }
+    const [agent, type, msg] = lines[i];
+    const div = document.createElement('div');
+    div.className = 'log-line';
+    div.style.animationDelay = '0s';
+    const now = new Date();
+    const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+    div.innerHTML = `<span class="log-time">${ts}</span><span class="${colors[agent] || 'log-agent-a'}">[${agent}]</span><span class="${resultClass[type] || 'log-msg'}">${msg}</span>`;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+    prog.style.width = ((i+1)/lines.length*100) + '%';
+    i++;
+    demoTimer = setTimeout(addLine, 700);
+  }
+  demoTimer = setTimeout(addLine, 400);
+}
+restartDemo();
+</script>
+</body>
+</html>

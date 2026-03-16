@@ -1,0 +1,49 @@
+<svg width="1500" height="500" viewBox="0 0 1500 500" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1500" height="500" fill="#0C1929"/>
+
+  <line x1="0" y1="250" x2="1500" y2="250" stroke="#0C447C" stroke-width="1" opacity="0.3"/>
+  <line x1="750" y1="0" x2="750" y2="500" stroke="#0C447C" stroke-width="1" opacity="0.3"/>
+  <line x1="0" y1="125" x2="1500" y2="125" stroke="#0C447C" stroke-width="0.5" opacity="0.15"/>
+  <line x1="0" y1="375" x2="1500" y2="375" stroke="#0C447C" stroke-width="0.5" opacity="0.15"/>
+  <line x1="375" y1="0" x2="375" y2="500" stroke="#0C447C" stroke-width="0.5" opacity="0.15"/>
+  <line x1="1125" y1="0" x2="1125" y2="500" stroke="#0C447C" stroke-width="0.5" opacity="0.15"/>
+
+  <!-- Right network -->
+  <circle cx="1240" cy="125" r="10" fill="#185FA5" opacity="0.6"/>
+  <circle cx="1370" cy="250" r="10" fill="#185FA5" opacity="0.6"/>
+  <circle cx="1240" cy="375" r="10" fill="#185FA5" opacity="0.6"/>
+  <circle cx="1100" cy="250" r="14" fill="#378ADD" opacity="0.8"/>
+  <circle cx="1440" cy="125" r="7" fill="#0C447C" opacity="0.8"/>
+  <circle cx="1440" cy="375" r="7" fill="#0C447C" opacity="0.8"/>
+  <line x1="1100" y1="250" x2="1240" y2="125" stroke="#378ADD" stroke-width="2" opacity="0.5"/>
+  <line x1="1100" y1="250" x2="1370" y2="250" stroke="#378ADD" stroke-width="2" opacity="0.5"/>
+  <line x1="1100" y1="250" x2="1240" y2="375" stroke="#378ADD" stroke-width="2" opacity="0.5"/>
+  <line x1="1240" y1="125" x2="1440" y2="125" stroke="#185FA5" stroke-width="1.5" opacity="0.3"/>
+  <line x1="1240" y1="375" x2="1440" y2="375" stroke="#185FA5" stroke-width="1.5" opacity="0.3"/>
+  <line x1="1370" y1="250" x2="1440" y2="125" stroke="#185FA5" stroke-width="1.5" opacity="0.3"/>
+  <line x1="1370" y1="250" x2="1440" y2="375" stroke="#185FA5" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- Left network -->
+  <circle cx="160" cy="160" r="7" fill="#185FA5" opacity="0.4"/>
+  <circle cx="280" cy="320" r="7" fill="#185FA5" opacity="0.4"/>
+  <circle cx="100" cy="360" r="6" fill="#0C447C" opacity="0.5"/>
+  <line x1="160" y1="160" x2="280" y2="320" stroke="#185FA5" stroke-width="1.5" opacity="0.25"/>
+  <line x1="280" y1="320" x2="100" y2="360" stroke="#185FA5" stroke-width="1.5" opacity="0.25"/>
+
+  <!-- Logo mark -->
+  <circle cx="440" cy="250" r="54" fill="#378ADD"/>
+  <circle cx="440" cy="250" r="27" fill="#fff"/>
+  <line x1="440" y1="196" x2="440" y2="223" stroke="#378ADD" stroke-width="11" stroke-linecap="round"/>
+  <line x1="494" y1="250" x2="467" y2="250" stroke="#378ADD" stroke-width="11" stroke-linecap="round"/>
+  <line x1="440" y1="304" x2="440" y2="277" stroke="#378ADD" stroke-width="11" stroke-linecap="round"/>
+  <line x1="386" y1="250" x2="413" y2="250" stroke="#378ADD" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="440" cy="196" r="11" fill="#85B7EB"/>
+  <circle cx="494" cy="250" r="11" fill="#85B7EB"/>
+  <circle cx="440" cy="304" r="11" fill="#85B7EB"/>
+  <circle cx="386" cy="250" r="11" fill="#85B7EB"/>
+
+  <!-- Text -->
+  <text x="530" y="232" font-family="Arial, sans-serif" font-size="80" font-weight="700" fill="#ffffff" letter-spacing="-2">Lattice</text>
+  <text x="534" y="295" font-family="Arial, sans-serif" font-size="30" fill="#85B7EB" letter-spacing="1">Connect any AI to any AI</text>
+  <text x="536" y="340" font-family="Arial, sans-serif" font-size="22" fill="#378ADD" letter-spacing="2" opacity="0.8">OPEN PROTOCOL · lattice-docs.vercel.app</text>
+</svg>
